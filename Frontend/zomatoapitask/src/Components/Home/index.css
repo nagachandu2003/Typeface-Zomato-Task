@@ -75,6 +75,8 @@ body{
     background-color: darkgreen;
     color:white;
     font-weight:bold;
+    width:30px;
+    text-align: center;
 }
 .address{
     margin-top:0;

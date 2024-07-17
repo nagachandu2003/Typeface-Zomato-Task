@@ -4,24 +4,26 @@ import { useState,useEffect } from "react";
 import { ThreeDots } from 'react-loader-spinner';
 import { Pagination } from "@mui/material";
 import { Link } from "react-router-dom";
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const countries = {
-    "India": 1,
-    "Australia": 14,
-    "Brazil": 30,
-    "Canada": 37,
-    "Indonesia": 94,
-    "New Zealand": 148,
-    "Philippines": 162,
-    "Qatar": 166,
-    "Singapore": 184,
-    "South Africa": 189,
-    "Sri Lanka": 191,
-    "Turkey": 208,
-    "UAE": 214,
-    "United Kingdom": 215,
-    "United States": 216
+    "1": "India",
+    "14": "Australia",
+    "30": "Brazil",
+    "37": "Canada",
+    "94": "Indonesia",
+    "148": "New Zealand",
+    "162": "Philippines",
+    "166": "Qatar",
+    "184": "Singapore",
+    "189": "South Africa",
+    "191": "Sri Lanka",
+    "208": "Turkey",
+    "214": "UAE",
+    "215": "United Kingdom",
+    "216": "United States"
   }
+
 
 const imageUrls = [
     'https://b.zmtcdn.com/data/pictures/7/2800057/7bfe535ceaae0b4082bd54fc775fb910_featured_v2.jpg',
@@ -54,6 +56,12 @@ const Home = ()  => {
     const [limit] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
 
+    const getRandomItem = () => {
+        const imageLink = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+        return imageLink
+    }
+
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
@@ -64,7 +72,7 @@ const Home = ()  => {
                     id: ele["_id"],
                     restaurantId: ele["Restaurant ID"],
                     restaurantName: ele["Restaurant Name"],
-                    countryCode: countries[ele["Country Code"]],
+                    countryCode: ele["Country Code"],
                     city: ele["City"],
                     address: ele["Address"],
                     locality: ele["Locality"],
@@ -78,11 +86,13 @@ const Home = ()  => {
                     hasOnlineDelivery: ele["Has Online delivery"],
                     isDeliveringNow: ele["Is delivering now"],
                     switchToOrderMenu: ele["Switch to order menu"],
-                    priceRange: ele["Price Range"],
+                    priceRange: ele["Price range"],
                     aggregateRating: ele["Aggregate rating"],
                     ratingColor: ele["Rating color"],
                     ratingText: ele["Rating text"],
-                    votes: ele["Votes"]
+                    votes: ele["Votes"],
+                    country : countries[ele["Country Code"]],
+                    imageUrl : getRandomItem()
                 }));
                 setTotalPages(data.totalPages);
                 setRestaurantsList(finalData);  // Use finalData instead of data.result
@@ -108,11 +118,6 @@ const Home = ()  => {
     const handlePageChange = (event, value) => {
         setPage(value);
     };
-
-    const getRandomItem = () => {
-        const imageLink = imageUrls[Math.floor(Math.random() * imageUrls.length)];
-        return imageLink
-    }
 
     console.log(restaurantsList)
 
@@ -151,9 +156,9 @@ const Home = ()  => {
                 <ul className="restaurants-list-container">
                     {filteredData.map((ele,index) => (
                         <li key={index} className="restaurant-card">
-                            <Link className="link-tag" to={`/restaurants/${ele.restaurantId}`}>
+                            <Link className="link-tag" to={`/restaurants/${ele.country}/${ele.restaurantId}`}>
                             <div>
-                                <img src={getRandomItem()} alt="restaurant-image" className="restaurant-image"/>
+                                <img src={ele.imageUrl} alt="restaurant-image" className="restaurant-image"/>
                                 <div className="flex-container1">
                                 <p>{ele.restaurantName}</p>
                                 <p className="rating">{ele.aggregateRating}</p>

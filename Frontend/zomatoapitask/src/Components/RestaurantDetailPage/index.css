@@ -1,0 +1,38 @@
+.main-container-rdp{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: "Roboto";
+    background-image: url("https://img.freepik.com/free-photo/cup-cappuccino-with-milk-blue-table_114579-66012.jpg?ga=GA1.1.1273215432.1720675067&semt=ais_user");
+    background-size:cover;
+}
+.navcontainer{
+    background-color: #E03546;
+    color:white;
+    padding:5px;
+}
+.main-heading1-rdp{
+    margin-left:10px;
+}
+.restaurant-detail-container{
+    font-family: "Roboto";
+    margin-left:10%;
+    margin-right:10%;
+}
+.image-rdp{
+    border-radius:5px;
+    width:100%;
+    height:400px;
+    margin:20px;
+    object-fit: cover;
+}
+
+.list-container-rdp{
+    padding-left: 0;
+    list-style-type: none;
+}
+.list-item{
+    margin:10px;
+    font-size:20px;
+    font-family: "Roboto";
+}

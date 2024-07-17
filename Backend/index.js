@@ -156,6 +156,83 @@ app.get("/restaurants", async (req,res) => {
     }
 })
 
+//API 5 : Filter Restaurants by Country
+app.get("/restaurants/country/:countryName", async (req,res) => {
+    try{
+        await connectToDatabase();
+        if(req.params.countryName in countries){
+        const result = await zomatoCollection.find({"Country Code":countries[req.params.countryName]}).toArray();
+        res.send({success : `Restaurants in ${req.params.countryName} Sent Successfully`,result});
+        }
+        else
+        res.send({Error : `There are no restaurants in the given Country ${req.params.countryName}`});
+    }
+    catch(Err){
+        res.send({Error : `Error Occurred : ${Err}`});
+    }
+    finally{
+        await client.close();
+    }
+})
+
+//API 6 : Filter Restaurants by Average Spend for Two People
+app.get("/restaurants/avgexpenditure/:costRange", async (req,res) => {
+    try{
+        await connectToDatabase();
+        const result = await zomatoCollection.find({"Average Cost for two":{$lte:parseInt(req.params.costRange)}}).toArray();
+        if(result.length>0)
+        res.send({success : `Restaurants Sent Successfully`,result});
+        else
+        res.send({Error : `No Restaurants Found`});
+        }
+    catch(Err){
+        res.send({Error : `Error Occurred : ${Err}`});
+    }
+    finally{
+        await client.close();
+    }
+})
+
+//API 7 : Filter Restaurants by Cuisines 
+app.get("/restaurants/cuisines/:cuisineName", async (req,res) => {
+    try{
+        await connectToDatabase();
+        const result = await zomatoCollection.find({ "Cuisines": { $in: [req.params.cuisineName] } }).toArray();
+        if(result.length>0)
+        res.send({success : `Restaurants in ${req.params.cuisineName} Sent Successfully`,result});
+        else
+        res.send({Error : `No Restaurants are Found with suggested Cuisine ${req.params.cuisineName}`});
+    }
+    catch(Err){
+        res.send({Error : `Error Occurred : ${Err}`});
+    }
+    finally{
+        await client.close();
+    }
+})
+
+//API 5 : Filter Restaurants data by Country, Average Spend for Two People, Cuisines
+// app.post("/restaurants", async (req,res) => {
+//     console.log(req.body);
+//     res.send({success : req.body});
+// });
+
+// app.get("/cuisines", async (req,res) => {
+//     try{
+//         await connectToDatabase();
+//         const result = await zomatoCollection.find({}).toArray();
+//         let arr = [];
+//         const getBrazilianCuisines = result.filter((ele) => ele.Cuisines.includes("Brazilian"));
+//         const rescuisines = result.flatMap(ele => ele.Cuisines.split(',').map(cuisine => cuisine.trim()));
+//         const uniqueCuisines = [...new Set(rescuisines)];
+//         const sortedCuisines = uniqueCuisines.sort();
+//         res.send({TotalCuisines : sortedCuisines.length,getBrazilianCuisines });
+//     }
+//     catch(Err){
+//         res.send({Error : Error Occurred : ${Err}});
+//     }
+// })
+
 
 
 app.listen(3001,() => {
