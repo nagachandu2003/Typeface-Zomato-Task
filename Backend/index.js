@@ -119,6 +119,43 @@ app.get("/loaddata", async (req,res) => {
     }
 })
 
+// API 3 : GET Restaurant Details using Restaurant ID
+app.get("/restaurants/:restaurantId", async (req,res) => {
+    try{
+        const {restaurantId} = req.params;
+        await connectToDatabase();
+        const result = await zomatoCollection.findOne({"Restaurant ID":parseInt(restaurantId)});
+        if(result)
+        res.status(200).send({success : `Restaurant data with ID ${restaurantId} sent Successfully `,result});
+        else{
+        res.status(404).send({Error : `No Restaurant Found with ID ${restaurantId}`});
+        }
+    }
+    catch(Error){
+        res.send({Error : `No Restaurants Found`});
+    }
+    finally{
+        await client.close();
+    }
+})
+
+//API 4 : GET List of all Restaurants
+app.get("/restaurants", async (req,res) => {
+    try{
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        await connectToDatabase();
+        const result = await zomatoCollection.find({}).skip(skip).limit(limit).toArray();
+        const totalRestaurants = await zomatoCollection.countDocuments();
+
+        res.status(200).send({success : "Restaurants List Sent Successfully", total:result.length,totalPages:Math.ceil(totalRestaurants/limit),result});
+    }
+    catch(Err){
+        res.status(404).send({Error : `Error Occurred while fetching list : ${Err}`})
+    }
+})
+
 
 
 app.listen(3001,() => {

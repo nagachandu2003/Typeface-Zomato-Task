@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Caveat:wght@400;700&family=Lobster&family=Monoton&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display+SC:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,700&family=Work+Sans:ital,wght@0,400;0,700;1,700&display=swap');
+body{
+    margin:0;
+    padding:0;
+}
+.landing-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-image:url("https://b.zmtcdn.com/web_assets/81f3ff974d82520780078ba1cfbd453a1583259680.png");
+    min-height:70vh;
+    font-family: "Roboto";
+}
+.landing-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color:white;
+    font-family:"Roboto";
+    font-weight:bold;
+}
+.main-heading1{
+    font-size:80px;
+    margin-bottom:0;
+}
+.paragraph1{
+    font-size:40px;
+    margin-top:0;
+}
+.search-input{
+    background-color: white;
+    width:80%;
+}
+.search-input-container{
+    background-color: white;
+}
+.loader-container{
+    display: flex;
+    justify-content: center;
+}
+.restaurants-list{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.restaurants-list-container{
+    list-style-type: none;
+    padding-left:0;
+    margin:10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width:90%;
+    flex-wrap:wrap;
+}
+.restaurant-card{
+    font-family:"Roboto";
+    margin:10px;
+}
+.restaurant-image{
+    height:250px;
+    width:350px;
+    border-radius:8px;
+}
+.flex-container1{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom:0;
+    margin-top:0;
+}
+.rating{
+    padding:3px;
+    border-radius:5px;
+    background-color: darkgreen;
+    color:white;
+    font-weight:bold;
+}
+.address{
+    margin-top:0;
+    color:#787878;
+}
+.avg-two{
+    color:#787878;
+    margin-top:0;
+}
+.flex-container2{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.pagination-container{
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+.link-tag{
+    text-decoration: none;
+    color:black;
+}

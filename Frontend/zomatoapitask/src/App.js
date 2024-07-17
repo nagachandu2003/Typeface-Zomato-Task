@@ -1,34 +1,16 @@
 import "./App.css"
+import { BrowserRouter,Routes,Route } from 'react-router-dom';
+import Home from "./Components/Home";
+import RestaurantDetailPage from "./Components/RestaurantDetailPage";
 
 const App = () => {
-  // const [country, setCountry] = useState('');
-  // const [avgcostoftwopeople, setAvgCostofTwoPeople] = useState('');
-  // const [cuisines, setCuisines] = useState([]);
-
-  const onSubmitForm = async () => {
-    try{
-      const options = {
-        method : "POST",
-        headers : {
-          "Content-Type" : "application/json"
-        },
-        body : JSON.stringify({
-          countrycode : 13,
-          avgcostoftwopeople : 1200,
-          cuisines : ["French", "Japanese", "Desserts"]          
-        })
-      }
-      const response = await fetch('http://localhost:3001/restaurants',options);
-      const data = await response.json()    
-      console.log(data);
-    }
-    catch(Err){
-      console.log(Err);
-    }
-  }
-
   return (
-    <button onClick={onSubmitForm}>Submit</button>
+    <BrowserRouter>
+    <Routes>
+      <Route exact path="/" element={<Home/>}/>
+      <Route exact path="/restaurants/:restaurantId" element={<RestaurantDetailPage/>}/>
+    </Routes>
+    </BrowserRouter>
   )
 }
 
