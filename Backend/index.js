@@ -211,25 +211,7 @@ app.get("/restaurants/cuisines/:cuisineName", async (req,res) => {
     }
 })
 
-//API 8 : Filter the Restaurants by Country,AvgCostForTwo,Cuisines
-// app.get("/filteredrestaurants", async (req,res) => {
-//     try{
-//         const page = parseInt(req.query.page)||1;
-//         const limit = parseInt(req.query.limit)||10;
-//         const countryName = parseInt(req.query.countryName)||1;
-//         const avgCostForTwoPeople = parseInt(req.query.avgCostForTwoPeople)||0;
-//         // const cuisines = req.query.cuisines||[];
-//         const skip = (page-1)*limit;
-//         const result = await zomatoCollection.find({"Country Code":countryName,"Average Cost for two":{$lte:parseInt(req.params.costRange)}}).skip(skip).limit(limit).toArray();
-//         res.send({success : "Filters Applied Successfully",result});
-//     }
-//     catch(Err){
-//         res.send({Error : `Error Occurred : ${Err}`});
-//     }
-//     finally{
-//         await client.close();
-//     }
-// })
+
 app.get("/filteredrestaurants", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -283,6 +265,20 @@ app.get("/cuisines", async (req,res) => {
     }
     catch(Err){
         res.send({Error : `Error Occurred : ${Err}`});
+    }
+})
+
+// Added random restaurant API
+app.get("/random", async (req,res) => {
+    try{
+        await connectToDatabase();
+        const count = await zomatoCollection.countDocuments(); 
+        const randomIndex = Math.floor(Math.random() * count);
+        const result = await zomatoCollection.find().skip(randomIndex).limit(1).toArray();
+        res.status(200).send({success : "Restaurants List Sent Successfully",result});
+    }
+    catch(Err){
+        res.status(404).send({Error : `Error Occurred while fetching list : ${Err}`});
     }
 })
 
