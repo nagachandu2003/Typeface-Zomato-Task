@@ -240,21 +240,21 @@ app.get("/filteredrestaurants", async (req, res) => {
         const skip = (page - 1) * limit;
         let queryObj = {};
 
-        if (countryName) {
+        if (countryName && countryName!=="1111") {
             queryObj["Country Code"] = parseInt(countryName);
         }
-        if (avgCostForTwoPeople) {
+        if (avgCostForTwoPeople && avgCostForTwoPeople!=="1111") {
             queryObj["Average Cost for two"] = { $gte: avgCostForTwoPeople };
         }
 
-        if (cuisines.length > 0 && cuisines[0] !== undefined) {
+        if (cuisines.length > 0 && cuisines[0] !== undefined && req.query.cuisines!=="1111") {
             queryObj["Cuisines"] = { $in: cuisines };
         }
         await connectToDatabase();
         // Fetching data from the collection
         const totalPages = await zomatoCollection.countDocuments(queryObj);
         const result = await zomatoCollection.find(queryObj).skip(skip).limit(limit).toArray();
-        res.send({ success: "Filters Applied Successfully", totalPages,result });
+        res.send({ success: "Filters Applied Successfully", totalPages:Math.ceil(totalPages/limit),result });
     } catch (Err) {
         res.send({ Error: `Error Occurred: ${Err}` });
     } finally {
@@ -269,21 +269,22 @@ app.get("/filteredrestaurants", async (req, res) => {
 //     res.send({success : req.body});
 // });
 
-// app.get("/cuisines", async (req,res) => {
-//     try{
-//         await connectToDatabase();
-//         const result = await zomatoCollection.find({}).toArray();
-//         let arr = [];
-//         const getBrazilianCuisines = result.filter((ele) => ele.Cuisines.includes("Brazilian"));
-//         const rescuisines = result.flatMap(ele => ele.Cuisines.split(',').map(cuisine => cuisine.trim()));
-//         const uniqueCuisines = [...new Set(rescuisines)];
-//         const sortedCuisines = uniqueCuisines.sort();
-//         res.send({TotalCuisines : sortedCuisines.length,getBrazilianCuisines });
-//     }
-//     catch(Err){
-//         res.send({Error : Error Occurred : ${Err}});
-//     }
-// })
+app.get("/cuisines", async (req,res) => {
+    try{
+        await connectToDatabase();
+        const result = await zomatoCollection.find({}).toArray();
+        // console.log(result.length);
+        // const getBrazilianCuisines = result.filter((ele) => ele.Cuisines.includes("Brazilian"));
+        const rescuisines = result.flatMap(ele => (ele.Cuisines).map(cuisine => cuisine.trim()));
+        const uniqueCuisines = [...new Set(rescuisines)];
+        const sortedCuisines = uniqueCuisines.sort();
+        res.send({TotalCuisines : sortedCuisines.length,sortedCuisines });
+        // res.send({total:result.length,rescuisines})
+    }
+    catch(Err){
+        res.send({Error : `Error Occurred : ${Err}`});
+    }
+})
 
 
 

@@ -5,10 +5,10 @@ import { ThreeDots } from 'react-loader-spinner';
 import { Pagination } from "@mui/material";
 import { Link } from "react-router-dom";
 import { MenuItem, FormControl, Select, InputLabel, Chip, Box, Button } from '@mui/material';
+import { FaStar } from "react-icons/fa";
 
 
 const countries = {
-    "" : null,
     "1": "India",
     "14": "Australia",
     "30": "Brazil",
@@ -60,7 +60,153 @@ const countriesList = [
   ];
 
 const avgCostForTwoList = [0,350,750,1500]
-const cuisinesList = ["Mughalai","Chinese","Japanese","French"];
+const cuisinesList = [
+    "Afghani",
+        "African",
+        "American",
+        "Andhra",
+        "Arabian",
+        "Argentine",
+        "Armenian",
+        "Asian",
+        "Asian Fusion",
+        "Assamese",
+        "Australian",
+        "Awadhi",
+        "BBQ",
+        "Bakery",
+        "Bar Food",
+        "Belgian",
+        "Bengali",
+        "Beverages",
+        "Bihari",
+        "Biryani",
+        "Brazilian",
+        "Breakfast",
+        "British",
+        "Bubble Tea",
+        "Burger",
+        "Burmese",
+        "B�_rek",
+        "Cafe",
+        "Cajun",
+        "Canadian",
+        "Cantonese",
+        "Caribbean",
+        "Charcoal Grill",
+        "Chettinad",
+        "Chinese",
+        "Coffee and Tea",
+        "Contemporary",
+        "Continental",
+        "Cuban",
+        "Cuisine Varies",
+        "Curry",
+        "Deli",
+        "Desserts",
+        "Dim Sum",
+        "Diner",
+        "Drinks Only",
+        "Durban",
+        "D�_ner",
+        "European",
+        "Fast Food",
+        "Filipino",
+        "Finger Food",
+        "Fish and Chips",
+        "French",
+        "Fusion",
+        "German",
+        "Goan",
+        "Gourmet Fast Food",
+        "Greek",
+        "Grill",
+        "Gujarati",
+        "Hawaiian",
+        "Healthy Food",
+        "Hyderabadi",
+        "Ice Cream",
+        "Indian",
+        "Indonesian",
+        "International",
+        "Iranian",
+        "Irish",
+        "Italian",
+        "Izgara",
+        "Japanese",
+        "Juices",
+        "Kashmiri",
+        "Kebab",
+        "Kerala",
+        "Kiwi",
+        "Korean",
+        "Latin American",
+        "Lebanese",
+        "Lucknowi",
+        "Maharashtrian",
+        "Malay",
+        "Malaysian",
+        "Malwani",
+        "Mangalorean",
+        "Mediterranean",
+        "Mexican",
+        "Middle Eastern",
+        "Mineira",
+        "Mithai",
+        "Modern Australian",
+        "Modern Indian",
+        "Moroccan",
+        "Mughlai",
+        "Naga",
+        "Nepalese",
+        "New American",
+        "North Eastern",
+        "North Indian",
+        "Oriya",
+        "Pakistani",
+        "Parsi",
+        "Patisserie",
+        "Peranakan",
+        "Persian",
+        "Peruvian",
+        "Pizza",
+        "Portuguese",
+        "Pub Food",
+        "Rajasthani",
+        "Ramen",
+        "Raw Meats",
+        "Restaurant Cafe",
+        "Salad",
+        "Sandwich",
+        "Scottish",
+        "Seafood",
+        "Singaporean",
+        "Soul Food",
+        "South African",
+        "South American",
+        "South Indian",
+        "Southern",
+        "Southwestern",
+        "Spanish",
+        "Sri Lankan",
+        "Steak",
+        "Street Food",
+        "Sunda",
+        "Sushi",
+        "Taiwanese",
+        "Tapas",
+        "Tea",
+        "Teriyaki",
+        "Tex-Mex",
+        "Thai",
+        "Tibetan",
+        "Turkish",
+        "Turkish Pizza",
+        "Vegetarian",
+        "Vietnamese",
+        "Western",
+        "World Cuisine"
+];
 
 
 const imageUrls = [
@@ -91,7 +237,7 @@ const Home = ()  => {
     const [isLoading, setIsLoading] = useState(false);
     const [restaurantsList, setRestaurantsList] = useState([]);
     const [page, setPage] = useState(1);
-    const [limit] = useState(10);
+    const [limit] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedCuisines, setSelectedCuisines] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
@@ -165,7 +311,7 @@ const Home = ()  => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch(`http://localhost:3001/restaurants?page=${page}&limit=${limit}`)
+                const response = await fetch(`http://localhost:3001/filteredRestaurants?page=${page}&limit=${limit}&countryName=${countries[selectedCountry]!==undefined?countries[selectedCountry]:selectedCountry}&avgCostForTwoPeople=${selectedAvgCostForTwo}&cuisines=${selectedCuisines.join(",")}`)
                 const data = await response.json();
                 const finalData = data.result.map((ele) => ({
                     id: ele["_id"],
@@ -313,12 +459,12 @@ const Home = ()  => {
                 <ul className="restaurants-list-container">
                     {filteredData.map((ele,index) => (
                         <li key={index} className="restaurant-card">
-                            <Link className="link-tag" to={`/restaurants/${ele.country}/${ele.restaurantId}`}>
+                            <Link className="link-tag" to={`/restaurants/${ele.country}/${ele.restaurantId}`} target="_blank">
                             <div>
                                 <img src={ele.imageUrl} alt="restaurant-image" className="restaurant-image"/>
                                 <div className="flex-container1">
                                 <p>{ele.restaurantName}</p>
-                                <p className="rating">{ele.aggregateRating}</p>
+                                <p className="rating">{ele.aggregateRating} <FaStar/></p>
                                 </div>
                                 <div className="flex-container2">
                                 <p className="address">{ele.address.substring(0, 20) + "..."}</p>

@@ -57,6 +57,11 @@ body{
     font-family:"Roboto";
     margin:10px;
 }
+.restaurant-card:hover{
+    border:2px solid black;
+    border-radius:5px;
+    padding:10px;
+}
 .restaurant-image{
     height:250px;
     width:350px;
@@ -75,7 +80,7 @@ body{
     background-color: darkgreen;
     color:white;
     font-weight:bold;
-    width:30px;
+    width:50px;
     text-align: center;
 }
 .address{

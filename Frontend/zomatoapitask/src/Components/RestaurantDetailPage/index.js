@@ -2,6 +2,8 @@ import "./index.css"
 import { useParams } from "react-router-dom"
 import {useState, useEffect} from 'react'
 import { ThreeDots } from "react-loader-spinner"
+import { SiGooglemaps } from "react-icons/si";
+import { FaStar } from "react-icons/fa";
 
 const imageUrls = [
     'https://b.zmtcdn.com/data/pictures/7/2800057/7bfe535ceaae0b4082bd54fc775fb910_featured_v2.jpg',
@@ -56,7 +58,7 @@ const RestaurantDetailPage = () => {
                     localityVerbose: ele["Locality Verbose"],
                     longitude: ele["Longitude"],
                     latitude: ele["Latitude"],
-                    cuisines: ele["Cuisines"],
+                    cuisines: ele["Cuisines"].join(", "),
                     avgCostForTwo: ele["Average Cost for two"],
                     currency: ele["Currency"],
                     hasTableBooking: ele["Has Table booking"],
@@ -104,19 +106,22 @@ const RestaurantDetailPage = () => {
                         <div className="details-container">
                         <img className="image-rdp" src={restaurantDetails.imageUrl} alt={restaurantDetails.restaurantName}/>
                         <div className="flex-container1">
-                        <h1>Name : {restaurantDetails.restaurantName}</h1>
-                        <p className="rating">{restaurantDetails.aggregateRating}</p>
+                        <h1>Name : {restaurantDetails.restaurantName} <a href={`https://www.google.com/maps?q=${restaurantDetails.latitude},${restaurantDetails.longitude}`} target="_blank" rel="noreferrer"><SiGooglemaps className="icon"/></a></h1>
+                        <p className="rating">{restaurantDetails.aggregateRating} <FaStar/></p>
                         </div>
-                        <div>
-                        <h1>Cuisines : {restaurantDetails.cuisines}</h1>
+                        <div style={{display:'flex',justifyContent:'space-between'}}>
+                        <h2 style={{backgroundColor:'green',color:'yellow',padding:'10px',borderRadius:'8px'}}>Cuisines : {restaurantDetails.cuisines}</h2>
                         <p>Votes : {restaurantDetails.votes}</p>
                         </div>
+                        <div className="flex-container2">
+                        <div>
                         <h2>Country : {countryName}</h2>
                         <h2>City : {restaurantDetails.city}</h2>
                         <h3>Address : {restaurantDetails.address}</h3>
                         <h4>Average Order for Two : {restaurantDetails.avgCostForTwo}</h4>
                         <h4>Currency : {restaurantDetails.currency}</h4>
-                        <ul className="list-container-rdp">
+                        </div>
+                    <ul className="list-container-rdp">
                     <li className="list-item">Locality: {restaurantDetails.locality}</li>
                     <li className="list-item">Locality Verbose: {restaurantDetails.localityVerbose}</li>
                     <li className="list-item">Has Table booking: {restaurantDetails.hasTableBooking ? 'Yes' : 'No'}</li>
@@ -125,6 +130,7 @@ const RestaurantDetailPage = () => {
                     <li className="list-item">Switch to order menu: {restaurantDetails.switchToOrderMenu ? 'Yes' : 'No'}</li>
                     <li className="list-item">Price range: {restaurantDetails.priceRange}</li>
                     </ul>
+                    </div>
                         </div>
                     </div>
                 )}
