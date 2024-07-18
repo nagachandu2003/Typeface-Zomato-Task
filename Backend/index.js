@@ -211,6 +211,58 @@ app.get("/restaurants/cuisines/:cuisineName", async (req,res) => {
     }
 })
 
+//API 8 : Filter the Restaurants by Country,AvgCostForTwo,Cuisines
+// app.get("/filteredrestaurants", async (req,res) => {
+//     try{
+//         const page = parseInt(req.query.page)||1;
+//         const limit = parseInt(req.query.limit)||10;
+//         const countryName = parseInt(req.query.countryName)||1;
+//         const avgCostForTwoPeople = parseInt(req.query.avgCostForTwoPeople)||0;
+//         // const cuisines = req.query.cuisines||[];
+//         const skip = (page-1)*limit;
+//         const result = await zomatoCollection.find({"Country Code":countryName,"Average Cost for two":{$lte:parseInt(req.params.costRange)}}).skip(skip).limit(limit).toArray();
+//         res.send({success : "Filters Applied Successfully",result});
+//     }
+//     catch(Err){
+//         res.send({Error : `Error Occurred : ${Err}`});
+//     }
+//     finally{
+//         await client.close();
+//     }
+// })
+app.get("/filteredrestaurants", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const countryName = req.query.countryName;
+        const avgCostForTwoPeople = parseInt(req.query.avgCostForTwoPeople) || 0;
+        const cuisines = req.query.cuisines ? req.query.cuisines.split(',') : [];
+        const skip = (page - 1) * limit;
+        let queryObj = {};
+
+        if (countryName) {
+            queryObj["Country Code"] = parseInt(countryName);
+        }
+        if (avgCostForTwoPeople) {
+            queryObj["Average Cost for two"] = { $gte: avgCostForTwoPeople };
+        }
+
+        if (cuisines.length > 0 && cuisines[0] !== undefined) {
+            queryObj["Cuisines"] = { $in: cuisines };
+        }
+        await connectToDatabase();
+        // Fetching data from the collection
+        const totalPages = await zomatoCollection.countDocuments(queryObj);
+        const result = await zomatoCollection.find(queryObj).skip(skip).limit(limit).toArray();
+        res.send({ success: "Filters Applied Successfully", totalPages,result });
+    } catch (Err) {
+        res.send({ Error: `Error Occurred: ${Err}` });
+    } finally {
+        await client.close();
+    }
+});
+
+
 //API 5 : Filter Restaurants data by Country, Average Spend for Two People, Cuisines
 // app.post("/restaurants", async (req,res) => {
 //     console.log(req.body);

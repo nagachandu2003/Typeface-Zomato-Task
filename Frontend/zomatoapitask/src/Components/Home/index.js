@@ -4,9 +4,11 @@ import { useState,useEffect } from "react";
 import { ThreeDots } from 'react-loader-spinner';
 import { Pagination } from "@mui/material";
 import { Link } from "react-router-dom";
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { MenuItem, FormControl, Select, InputLabel, Chip, Box, Button } from '@mui/material';
+
 
 const countries = {
+    "" : null,
     "1": "India",
     "14": "Australia",
     "30": "Brazil",
@@ -21,8 +23,44 @@ const countries = {
     "208": "Turkey",
     "214": "UAE",
     "215": "United Kingdom",
-    "216": "United States"
+    "216": "United States",
+    "India": 1,
+    "Australia": 14,
+    "Brazil": 30,
+    "Canada": 37,
+    "Indonesia": 94,
+    "New Zealand": 148,
+    "Philippines": 162,
+    "Qatar": 166,
+    "Singapore": 184,
+    "South Africa": 189,
+    "Sri Lanka": 191,
+    "Turkey": 208,
+    "UAE": 214,
+    "United Kingdom": 215,
+    "United States": 216
   }
+
+const countriesList = [
+    "Australia",
+    "Brazil",
+    "Canada",
+    "India",
+    "Indonesia",
+    "New Zealand",
+    "Philippines",
+    "Qatar",
+    "Singapore",
+    "South Africa",
+    "Sri Lanka",
+    "Turkey",
+    "UAE",
+    "United Kingdom",
+    "United States"
+  ];
+
+const avgCostForTwoList = [0,350,750,1500]
+const cuisinesList = ["Mughalai","Chinese","Japanese","French"];
 
 
 const imageUrls = [
@@ -55,10 +93,71 @@ const Home = ()  => {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [selectedCuisines, setSelectedCuisines] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedAvgCostForTwo, setSelectedAvgCostForTwo] = useState('');
+
+    const handleCuisineChange = (event) => {
+        setSelectedCuisines(event.target.value);
+    };
+
+    const handleCountryChange = (event) => {
+        setSelectedCountry(event.target.value);
+    };
+
+    const handleAvgCostForTwoChange = (event) => {
+        setSelectedAvgCostForTwo(event.target.value);
+    };
 
     const getRandomItem = () => {
         const imageLink = imageUrls[Math.floor(Math.random() * imageUrls.length)];
         return imageLink
+    }
+
+    const applyFilters = async (countryName,avgCostForTwoPeople,cuisinesString) => {
+        try{
+            const response = await fetch(`http://localhost:3001/filteredrestaurants?page=${page}&limit=${limit}&countryName=${countries[countryName]}&avgCostForTwoPeople=${avgCostForTwoPeople}&cuisines=${cuisinesString}`)
+            const data = await response.json();
+            const finalData = data.result.map((ele) => ({
+                id: ele["_id"],
+                restaurantId: ele["Restaurant ID"],
+                restaurantName: ele["Restaurant Name"],
+                countryCode: ele["Country Code"],
+                city: ele["City"],
+                address: ele["Address"],
+                locality: ele["Locality"],
+                localityVerbose: ele["Locality Verbose"],
+                longitude: ele["Longitude"],
+                latitude: ele["Latitude"],
+                cuisines: ele["Cuisines"],
+                avgCostForTwo: ele["Average Cost for two"],
+                currency: ele["Currency"],
+                hasTableBooking: ele["Has Table booking"],
+                hasOnlineDelivery: ele["Has Online delivery"],
+                isDeliveringNow: ele["Is delivering now"],
+                switchToOrderMenu: ele["Switch to order menu"],
+                priceRange: ele["Price range"],
+                aggregateRating: ele["Aggregate rating"],
+                ratingColor: ele["Rating color"],
+                ratingText: ele["Rating text"],
+                votes: ele["Votes"],
+                country : countries[ele["Country Code"]],
+                imageUrl : getRandomItem()
+            }));
+            setRestaurantsList(finalData);
+            setTotalPages(data.totalPages);
+        }
+        catch(Err){
+            console.log(`Error Occurred : ${Err}`);
+        }
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const countryName = selectedCountry;
+        const avgCostForTwoPeople = selectedAvgCostForTwo;
+        const cuisinesString = selectedCuisines.join(',');
+        applyFilters(countryName,avgCostForTwoPeople,cuisinesString)
     }
 
 
@@ -66,7 +165,7 @@ const Home = ()  => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch(`http://localhost:3001/restaurants?page=${page}&limit=${limit}`);
+                const response = await fetch(`http://localhost:3001/restaurants?page=${page}&limit=${limit}`)
                 const data = await response.json();
                 const finalData = data.result.map((ele) => ({
                     id: ele["_id"],
@@ -106,6 +205,8 @@ const Home = ()  => {
         fetchData();
     }, [page, limit]);
 
+    
+
     const filteredData = restaurantsList.filter((restaurant) => {
         const restaurantNameMatch = restaurant.restaurantName.toLowerCase().includes(searchInput.toLowerCase());
         const cuisinesMatch = restaurant.cuisines.some(cuisine => 
@@ -118,8 +219,6 @@ const Home = ()  => {
     const handlePageChange = (event, value) => {
         setPage(value);
     };
-
-    console.log(restaurantsList)
 
     return (
         <>
@@ -153,6 +252,64 @@ const Home = ()  => {
             )}
             {isLoading===false && (
                 <div className="restaurants-list">
+                <div className="filters-container">
+                    <h1>Filters</h1>
+                    <div className="filters-form-container">
+                <FormControl  fullWidth>
+                    <InputLabel id="country-label">Country</InputLabel>
+                    <Select
+                        labelId="country-label"
+                        value={selectedCountry}
+                        onChange={handleCountryChange}
+                    >
+                        {countriesList.map((country) => (
+                            <MenuItem key={country} value={country}>
+                                {country}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel id="avg-cost-for-two-label">Avg Cost for Two</InputLabel>
+                    <Select
+                        labelId="avg-cost-for-two-label"
+                        value={selectedAvgCostForTwo}
+                        onChange={handleAvgCostForTwoChange}
+                    >
+                        {avgCostForTwoList.map((cost) => (
+                            <MenuItem key={cost} value={cost}>
+                                {cost}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl fullWidth>
+                    <InputLabel id="cuisines-label">Cuisines</InputLabel>
+                    <Select
+                        labelId="cuisines-label"
+                        multiple
+                        value={selectedCuisines}
+                        onChange={handleCuisineChange}
+                        renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((value) => (
+                                    <Chip key={value} label={value} />
+                                ))}
+                            </Box>
+                        )}
+                    >
+                        {cuisinesList.map((cuisine) => (
+                            <MenuItem key={cuisine} value={cuisine}>
+                                {cuisine}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                </div>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+                Submit
+            </Button>
+                </div>
                 <ul className="restaurants-list-container">
                     {filteredData.map((ele,index) => (
                         <li key={index} className="restaurant-card">

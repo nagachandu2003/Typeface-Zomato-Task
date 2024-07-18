@@ -3,8 +3,9 @@
     flex-direction: column;
     min-height: 100vh;
     font-family: "Roboto";
-    background-image: url("https://img.freepik.com/free-photo/cup-cappuccino-with-milk-blue-table_114579-66012.jpg?ga=GA1.1.1273215432.1720675067&semt=ais_user");
+    background-image: url("https://img.freepik.com/premium-photo/dark-blue-background_220873-4185.jpg?ga=GA1.1.1273215432.1720675067&semt=ais_user");
     background-size:cover;
+    color:white;
 }
 .navcontainer{
     background-color: #E03546;

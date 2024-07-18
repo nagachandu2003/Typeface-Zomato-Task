@@ -30,19 +30,12 @@ const RestaurantDetailPage = () => {
     // Getting Restaurant Id from paramters
     const params = useParams();
     const {countryName,restaurantId} = params;
-    const [activeStatus, setActiveStatus] = useState('no');
     
     const [restaurantDetails, setRestaurantDetails] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const getRandomItem = () => {
         const imageLink = imageUrls[Math.floor(Math.random() * imageUrls.length)];
         return imageLink
-    }
-    const onClickViewMore = () => {
-        if(activeStatus==="no")
-            setActiveStatus("yes");
-        else
-        setActiveStatus("no");
     }
     
     useEffect(() => {
@@ -123,8 +116,7 @@ const RestaurantDetailPage = () => {
                         <h3>Address : {restaurantDetails.address}</h3>
                         <h4>Average Order for Two : {restaurantDetails.avgCostForTwo}</h4>
                         <h4>Currency : {restaurantDetails.currency}</h4>
-                        <button type="button" onClick={onClickViewMore}>View More</button>
-                        <ul style={{ display: activeStatus === "yes" ? 'block' : 'none' }} className="list-container-rdp">
+                        <ul className="list-container-rdp">
                     <li className="list-item">Locality: {restaurantDetails.locality}</li>
                     <li className="list-item">Locality Verbose: {restaurantDetails.localityVerbose}</li>
                     <li className="list-item">Has Table booking: {restaurantDetails.hasTableBooking ? 'Yes' : 'No'}</li>
