@@ -8,6 +8,7 @@ body{
     flex-direction: column;
     justify-content: center;
     background-image:url("https://b.zmtcdn.com/web_assets/81f3ff974d82520780078ba1cfbd453a1583259680.png");
+    background-size: cover;
     min-height:70vh;
     font-family: "Roboto";
 }
@@ -93,11 +94,14 @@ body{
     color:#787878;
     margin-top:0;
 }
-.flex-container2{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+
+@media (min-width:768px){
+    .flex-container2{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 .pagination-container{
     margin-top:10px;
@@ -116,4 +120,10 @@ body{
 }
 .filters-container{
     width:90%;
+}
+@media (min-width:768px){
+.flex-container3{
+    display:flex;
+    justify-content: space-between;
+}
 }

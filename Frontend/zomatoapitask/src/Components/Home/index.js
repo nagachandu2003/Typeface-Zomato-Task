@@ -1,11 +1,12 @@
 import "./index.css"
 import TextField from '@mui/material/TextField';
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import { ThreeDots } from 'react-loader-spinner';
 import { Pagination } from "@mui/material";
 import { Link } from "react-router-dom";
 import { MenuItem, FormControl, Select, InputLabel, Chip, Box, Button } from '@mui/material';
 import { FaStar } from "react-icons/fa";
+import {Avatar, Slider, Typography } from "@mui/material";
 
 
 const countries = {
@@ -242,6 +243,14 @@ const Home = ()  => {
     const [selectedCuisines, setSelectedCuisines] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedAvgCostForTwo, setSelectedAvgCostForTwo] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
+    const [distance, setDistance] = useState(10);
+    const [image, setImage] = useState();
+    const [preview,setPreview] = useState();
+    const [isImageUploadActive, setIsImageUploadActive] = useState(false);
+    const [isLocationSearchActive, setIsLocationSearchActive] = useState(false);
+    const [isAllRestaurantsActive, setIsAllRestaurantsActive] = useState(false);
 
     const handleCuisineChange = (event) => {
         setSelectedCuisines(event.target.value);
@@ -260,9 +269,25 @@ const Home = ()  => {
         return imageLink
     }
 
+    const clearFilters = () => {
+        setSelectedCountry('');
+        setSelectedCuisines([]);
+        setSelectedAvgCostForTwo('');
+        applyFilters('','','');
+        setPage(1);
+    }
+
     const applyFilters = async (countryName,avgCostForTwoPeople,cuisinesString) => {
         try{
-            const response = await fetch(`http://localhost:3001/filteredrestaurants?page=${page}&limit=${limit}&countryName=${countries[countryName]}&avgCostForTwoPeople=${avgCostForTwoPeople}&cuisines=${cuisinesString}`)
+            if(isImageUploadActive){
+                await handleSubmitImage(page);
+            }
+            else if(isLocationSearchActive){
+                await searchByLocation(latitude,longitude,page);
+            }
+            else if(isAllRestaurantsActive){
+            let apiurl = `http://localhost:3001/restaurants?page=${page}&limit=${limit}&countryName=${countries[countryName]}&avgCostForTwoPeople=${avgCostForTwoPeople}&cuisines=${cuisinesString}`;
+            const response = await fetch(apiurl)
             const data = await response.json();
             const finalData = data.result.map((ele) => ({
                 id: ele["_id"],
@@ -293,6 +318,7 @@ const Home = ()  => {
             setRestaurantsList(finalData);
             setTotalPages(data.totalPages);
         }
+        }
         catch(Err){
             console.log(`Error Occurred : ${Err}`);
         }
@@ -305,13 +331,147 @@ const Home = ()  => {
         const cuisinesString = selectedCuisines.join(',');
         applyFilters(countryName,avgCostForTwoPeople,cuisinesString)
     }
+    const handleSubmitImage = async (val) => {
+        try {
+            setIsLoading(true)
+            const formData = new FormData();
+            formData.append("image", image); // "image" is the field name expected by the backend API
+        
+            // Send the image to the backend
+            const response = await fetch(`http://localhost:3001/api/analyze-image?page=${val}&limit=${limit}&countryName=${countries[selectedCountry]!==undefined?countries[selectedCountry]:selectedCountry}&avgCostForTwoPeople=${selectedAvgCostForTwo}&cuisines=${selectedCuisines.join(",")}`, {
+              method: "POST",
+              body: formData,
+            });
+        
+            if (!response.ok) {
+              throw new Error("Failed to upload image.");
+            }
+        
+            const data = await response.json();
+            const finalData = data.result.map((ele) => ({
+                id: ele["_id"],
+                restaurantId: ele["Restaurant ID"],
+                restaurantName: ele["Restaurant Name"],
+                countryCode: ele["Country Code"],
+                city: ele["City"],
+                address: ele["Address"],
+                locality: ele["Locality"],
+                localityVerbose: ele["Locality Verbose"],
+                longitude: ele["Longitude"],
+                latitude: ele["Latitude"],
+                cuisines: ele["Cuisines"],
+                avgCostForTwo: ele["Average Cost for two"],
+                currency: ele["Currency"],
+                hasTableBooking: ele["Has Table booking"],
+                hasOnlineDelivery: ele["Has Online delivery"],
+                isDeliveringNow: ele["Is delivering now"],
+                switchToOrderMenu: ele["Switch to order menu"],
+                priceRange: ele["Price range"],
+                aggregateRating: ele["Aggregate rating"],
+                ratingColor: ele["Rating color"],
+                ratingText: ele["Rating text"],
+                votes: ele["Votes"],
+                country : countries[ele["Country Code"]],
+                imageUrl : getRandomItem()
+            }));
+            setTotalPages(data.totalPages);
+            setRestaurantsList(finalData);
+            setIsImageUploadActive(true);
+            setIsLocationSearchActive(false);
+            setIsAllRestaurantsActive(false);
+            setIsLoading(false);
 
+          } catch (error) {
+            console.error("Error in uploadImageToClarifai:", error.message);
+          }
+    }
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setImage(file);
+          setPreview(URL.createObjectURL(file)); // Create preview URL
+        }
+      };
 
-    useEffect(() => {
-        const fetchData = async () => {
+    const searchByLocation = async (lat,lon,val) => {
+        try {
+            setIsLoading(true);
+            const options = {
+                method : "POST",
+                headers : {
+                    "Content-Type" : "application/json"
+                },
+                body : JSON.stringify({latitude:lat,longitude:lon,distance})
+            }
+            const response = await fetch(`http://localhost:3001/restaurants/getnearbyrestaurants?page=${val}&limit=${limit}&countryName=${countries[selectedCountry]!==undefined?countries[selectedCountry]:selectedCountry}&avgCostForTwoPeople=${selectedAvgCostForTwo}&cuisines=${selectedCuisines.join(",")}`,options);
+            const data = await response.json();
+            if(data.success){
+                const finalData = data.result.map((ele) => ({
+                    id: ele["_id"],
+                    restaurantId: ele["Restaurant ID"],
+                    restaurantName: ele["Restaurant Name"],
+                    countryCode: ele["Country Code"],
+                    city: ele["City"],
+                    address: ele["Address"],
+                    locality: ele["Locality"],
+                    localityVerbose: ele["Locality Verbose"],
+                    longitude: ele["Longitude"],
+                    latitude: ele["Latitude"],
+                    cuisines: ele["Cuisines"],
+                    avgCostForTwo: ele["Average Cost for two"],
+                    currency: ele["Currency"],
+                    hasTableBooking: ele["Has Table booking"],
+                    hasOnlineDelivery: ele["Has Online delivery"],
+                    isDeliveringNow: ele["Is delivering now"],
+                    switchToOrderMenu: ele["Switch to order menu"],
+                    priceRange: ele["Price range"],
+                    aggregateRating: ele["Aggregate rating"],
+                    ratingColor: ele["Rating color"],
+                    ratingText: ele["Rating text"],
+                    votes: ele["Votes"],
+                    country : countries[ele["Country Code"]],
+                    imageUrl : getRandomItem()
+                }));
+                setRestaurantsList(finalData);
+                setTotalPages(data.totalPages);
+                setIsImageUploadActive(false);
+                setIsLocationSearchActive(true);
+                setIsAllRestaurantsActive(false);
+                setIsLoading(false);
+            }
+            else if(data.success===false){
+                setRestaurantsList([]);
+                setTotalPages(0);
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const handleSearchLocation =  () => {
+        if ("geolocation" in navigator) {
+            // Geolocation is available in this browser
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                searchByLocation(position.coords.latitude,position.coords.longitude)
+              },
+              async (error) => {
+                const response = await fetch("https://ipapi.co/json/");
+                const data = await response.json();
+                console.log(data.latitude,data.longitude);
+                searchByLocation(data.latitude,data.longitude,page);
+                // console.log(error);
+                }
+            );
+          } else {
+            alert("Geolocation is not supported by this browser.");
+          }
+    }
+
+    const getAllRestaurants = async (val) => {
             setIsLoading(true);
             try {
-                const response = await fetch(`http://localhost:3001/filteredRestaurants?page=${page}&limit=${limit}&countryName=${countries[selectedCountry]!==undefined?countries[selectedCountry]:selectedCountry}&avgCostForTwoPeople=${selectedAvgCostForTwo}&cuisines=${selectedCuisines.join(",")}`)
+                const response = await fetch(`http://localhost:3001/restaurants?page=${val}&limit=${limit}&countryName=${countries[selectedCountry]!==undefined?countries[selectedCountry]:selectedCountry}&avgCostForTwoPeople=${selectedAvgCostForTwo}&cuisines=${selectedCuisines.join(",")}`)
                 const data = await response.json();
                 const finalData = data.result.map((ele) => ({
                     id: ele["_id"],
@@ -342,14 +502,14 @@ const Home = ()  => {
                 setTotalPages(data.totalPages);
                 setRestaurantsList(finalData);  // Use finalData instead of data.result
                 setIsLoading(false);
+                setIsImageUploadActive(false);
+                setIsLocationSearchActive(false);
+                setIsAllRestaurantsActive(true);
             } catch (err) {
                 console.log(`Error Occurred : ${err}`);
                 setIsLoading(false);  // Make sure to set loading to false even if there's an error
             }
         };
-    
-        fetchData();
-    }, [page, limit]);
 
     
 
@@ -362,8 +522,16 @@ const Home = ()  => {
       });
       
 
-    const handlePageChange = (event, value) => {
+    const handlePageChange = async (event, value) => {
         setPage(value);
+        if (isImageUploadActive) {
+            await handleSubmitImage(value); // Call the image upload function for the new page
+          } else if (isLocationSearchActive) {
+            searchByLocation(latitude,longitude,value); // Example coordinates, replace with dynamic ones
+          }
+          else if(isAllRestaurantsActive){
+            getAllRestaurants(value);
+          }
     };
 
     return (
@@ -381,6 +549,42 @@ const Home = ()  => {
                 className="search-input"
                 onChange={(e) => setSearchInput(e.target.value)}
                 />
+                
+                {/* <div style={{width:'90%'}}>
+                    <div>
+                <div style={{marginTop:'10px',width:'90%',display:'flex',}}>
+                <TextField
+                id="filled-search"
+                label="Latitude"
+                type="search"
+                variant="filled"
+                sx={{ backgroundColor: 'white',width:'30%' }}
+                className="search-input"
+                onChange={(e) => setLatitude(e.target.value)}
+                />
+                <TextField
+                id="filled-search"
+                label="Longitude"
+                type="search"
+                variant="filled"
+                sx={{ backgroundColor: 'white', width:'30%' }}
+                className="search-input"
+                onChange={(e) => setLongitude(e.target.value)}
+                />
+            <Button variant="contained" style={{marginTop:'5px',backgroundColor:'white',color:'black'}} onClick={() => searchByLocation(parseFloat(latitude),parseFloat(longitude))}>
+                Search
+            </Button>
+            </div>
+            </div>
+            </div> */}
+            <div style={{marginTop:'10px',width:'50%', display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <Button type="button" variant="contained" color="primary" onClick={getAllRestaurants}>
+                Get All Restaurants
+            </Button>
+                <Button type="button" variant="contained" style={{marginTop:'5px',backgroundColor:'white',color:'black'}} onClick={handleSearchLocation}>
+                Get Near by Restaurants
+            </Button>
+            </div>
             </div>
         </div>
             <div>
@@ -398,6 +602,127 @@ const Home = ()  => {
             )}
             {isLoading===false && (
                 <div className="restaurants-list">
+                    <div className="filters-container">
+                        <h1>Features</h1>
+                        <div className="flex-container3">
+                        <Box
+                        sx={{
+                            maxWidth: 400,
+                            margin: "auto",
+                            display: "flex",
+                            flexGrow:1,
+                            flexDirection: "column",
+                            gap: 2,
+                            p: 3,
+                            boxShadow: 2,
+                            borderRadius: 2,
+                            backgroundColor:'white'
+                        }}
+                        >
+                        <Typography color="black" variant="h5" align="center" gutterBottom>
+                            Find Restaurants
+                        </Typography>
+
+                        {/* Latitude Input */}
+                        <TextField
+                            label="Latitude"
+                            variant="outlined"
+                            fullWidth
+                            value={latitude}
+                            onChange={(e) => setLatitude(e.target.value)}
+                            type="number"
+                            inputProps={{ step: "any" }} // Allows decimals
+                        />
+
+                        {/* Longitude Input */}
+                        <TextField
+                            label="Longitude"
+                            variant="outlined"
+                            fullWidth
+                            value={longitude}
+                            onChange={(e) => setLongitude(e.target.value)}
+                            type="number"
+                            inputProps={{ step: "any" }} // Allows decimals
+                        />
+
+                        {/* Range Slider */}
+                        <Typography id="range-slider" gutterBottom>
+                            Distance: {distance} km
+                        </Typography>
+                        <Slider
+                            value={distance}
+                            min={10} // Minimum 10 km
+                            max={50} // Maximum 50 km
+                            step={1}
+                            onChange={(e,newval) => setDistance(newval)}
+                            valueLabelDisplay="auto"
+                            aria-labelledby="range-slider"
+                        />
+                        <Button type="button" variant="contained" color="primary" onClick={() => searchByLocation(parseFloat(latitude),parseFloat(longitude))}>
+                            Search
+                        </Button>
+                        </Box>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                flexGrow:1,
+                                gap: 2,
+                                p: 3,
+                                boxShadow: 2,
+                                borderRadius: 2,
+                                maxWidth: 400,
+                                margin: "auto",
+                            }}
+                            >
+                            <Typography variant="h5" gutterBottom>
+                                Upload Food Image
+                            </Typography>
+
+                            {/* Image Preview */}
+                            {preview ? (
+                                <Avatar
+                                src={preview}
+                                alt="Food Preview"
+                                sx={{ width: 150, height: 150, borderRadius: 2 }}
+                                />
+                            ) : (
+                                <Avatar
+                                sx={{
+                                    width: 150,
+                                    height: 150,
+                                    borderRadius: 2,
+                                    backgroundColor: "#f0f0f0",
+                                }}
+                                >
+                                <Typography variant="caption">No Image</Typography>
+                                </Avatar>
+                            )}
+
+                            {/* Upload Button */}
+                            <Button variant="contained" component="label" color="primary">
+                                Choose Image
+                                <input
+                                type="file"
+                                accept="image/*"
+                                hidden
+                                onChange={handleImageChange}
+                                />
+                            </Button>
+
+                            {/* Display Image File Name */}
+                            {image && (
+                                <Typography variant="body2" color="textSecondary">
+                                {image.name}
+                                </Typography>
+                            )}
+                            <Button type="button" variant="contained" color="primary" onClick={() => handleSubmitImage(page)}>
+                                            Submit
+                            </Button>
+                            </Box>
+                        </div>
+                    </div>
                 <div className="filters-container">
                     <h1>Filters</h1>
                     <div className="filters-form-container">
@@ -452,19 +777,25 @@ const Home = ()  => {
                     </Select>
                 </FormControl>
                 </div>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
+            <Button type="button" variant="contained" color="primary" onClick={handleSubmit}>
                 Submit
+            </Button>
+            <Button style={{marginLeft:'5px'}} type="button" variant="contained" color="secondary" onClick={() => clearFilters()}>
+                                            Clear Filters
             </Button>
                 </div>
                 <ul className="restaurants-list-container">
-                    {filteredData.map((ele,index) => (
+                    {filteredData.length===0 && (
+                        <h1>No restaurants Found</h1>
+                    )}
+                    {filteredData.length!==0 && filteredData.map((ele,index) => (
                         <li key={index} className="restaurant-card">
                             <Link className="link-tag" to={`/restaurants/${ele.country}/${ele.restaurantId}`} target="_blank">
                             <div>
                                 <img src={ele.imageUrl} alt="restaurant-image" className="restaurant-image"/>
                                 <div className="flex-container1">
-                                <p>{ele.restaurantName}</p>
-                                <p className="rating">{ele.aggregateRating} <FaStar/></p>
+                                <p style={{width:'50%'}}>{ele.restaurantName}</p>
+                                <p style={{width:'20%'}} className="rating">{ele.aggregateRating} <FaStar/></p>
                                 </div>
                                 <div className="flex-container2">
                                 <p className="address">{ele.address.substring(0, 20) + "..."}</p>
