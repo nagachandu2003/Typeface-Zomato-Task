@@ -4,6 +4,8 @@ const {MongoClient} = require("mongodb");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const csvtojson = require("csvtojson");
+
+
 const multer = require("multer"); 
 const fs = require("fs");
 const Clarifai = require("clarifai");
@@ -19,8 +21,19 @@ const clarifaiApp = new Clarifai.App({
 apiKey: "e9efa0d0c6864a698e22dfa77ec3148e", // Replace with your Clarifai API Key
 });
 
-// Multer configuration for file uploads
-const upload = multer({ dest: "uploads/" }); // Files will temporarily be saved in 'uploads/'
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = '/tmp'; // Writable directory in serverless environments
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
   
 
 // Some Essential Data
