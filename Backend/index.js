@@ -16,7 +16,7 @@ dotenv.config();
 
 // Clarifai API Setup
 const clarifaiApp = new Clarifai.App({
-apiKey: "e9efa0d0c6864a698e22dfa77ec3148e", // Replace with your Clarifai API Key
+apiKey: process.env.clarifaiapikey, // Replace with your Clarifai API Key
 });
 
 // Multer configuration for file uploads
